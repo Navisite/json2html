@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Python 2 and 3
+from __future__ import unicode_literals    # at top of module
+from six import string_types, text_type
 
 '''
 JSON 2 HTML convertor
@@ -17,7 +20,14 @@ LICENSE: MIT
 '''
 
 import json
-import ordereddict
+
+# See http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
+try:
+	from collections import OrderedDict
+except ImportError:
+    from future.moves.collections import OrderedDict
+
+
 
 class JSON:
 
@@ -47,7 +57,7 @@ class JSON:
 			raise Exception('Can\'t convert NULL!')
 
 
-		ordered_json = json.loads(self.json_input, object_pairs_hook=ordereddict.OrderedDict)
+		ordered_json = json.loads(self.json_input, object_pairs_hook=OrderedDict)
 
 		return self.iterJson(ordered_json)
 
@@ -93,8 +103,8 @@ class JSON:
 			'''
 			Check for each value corresponding to its key and return accordingly
 			'''
-			if(isinstance(entry,unicode)):
-				return unicode(entry)
+			if(isinstance(entry,string_types)):
+				return text_type(entry)
 			if(isinstance(entry,int) or isinstance(entry,float)):
 				return str(entry)
 			if(parent_is_list and isinstance(entry,list)==True):
@@ -116,12 +126,12 @@ class JSON:
 		table_init_markup = "<table %s>" %(table_attributes)
 		convertedOutput = convertedOutput + table_init_markup
 
-		for k,v in ordered_json.iteritems():
+		for k,v in ordered_json.items():
 			convertedOutput = convertedOutput + '<tr>'
 			convertedOutput = convertedOutput + '<th>'+ str(k) +'</th>'
 
 			if (v == None):
-				v = unicode("")
+				v = text_type("")
 			if(isinstance(v,list)):
 				column_headers = self.columnHeadersFromListOfDicts(v)
 				if column_headers != None:
